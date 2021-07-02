@@ -21,20 +21,21 @@ for (let i = 1; i < splitedArr.length; i += 1 ) {
       tempArr.push(splitedArr[i][2]); // push some hours after first cell
     }
     outPutArr.push(tempArr);
-  }
-  outPutArr.forEach(name => {
-    if (name[0] === splitedArr[i][0]) { // currentName === AllPreviousNames
-      let diff = (idDate-(name.length-1));
-      if (diff > 1) {
-        for (let k = 1; k < diff; k += 1) {
-          name.push(0); // push 0 hours diff times after first cells
+  } else {
+    outPutArr.forEach(name => {
+      if (name[0] === splitedArr[i][0]) { // currentName === AllPreviousNames
+        let diff = (idDate-(name.length-1));
+        if (diff > 1) {
+          for (let k = 1; k < diff; k += 1) {
+            name.push(0); // push 0 hours diff times after first cells
+          }
+          name.push(splitedArr[i][2]); // push some hours after first cells
+        } else {
+          name.push(splitedArr[i][2]); // push some hours after first cells
         }
-        name.push(splitedArr[i][2]); // push some hours after first cells
-      } else {
-        name.push(splitedArr[i][2]); // push some hours after first cells
-      }
-    } 
-  })  
+      } 
+    })
+  }
 }
 
 for (let i = 0; i < splitedArr.length; i += 1 ) {  
@@ -48,10 +49,9 @@ for (let i = 0; i < splitedArr.length; i += 1 ) {
   })  
 }
 
-outPutArr[0].map((date, index) => { // MM DD YYYY to YYYY MM DD
+outPutArr[0].map((date, index) => { // MM DD YYYY to YYYY-MM-DD
   if (index >= 1) {
-    let isoDate = new Date(date + ' 10:00');
-    outPutArr[0][index] = isoDate.toISOString().slice(0,10);
+    outPutArr[0][index] = new Date(date + ' 10:00').toISOString().slice(0,10);
   }
 })
 
