@@ -1,72 +1,61 @@
 const fs = require('fs'); 
 const { resolve } = require('path');
 
-let data = fs.readFileSync(resolve('input.csv'), 'utf-8');
-let dataToArr = data.split('\r\n');
-let arr = [];
-for (let i = 0; i <= dataToArr.length - 1; i += 1 ) {
-  arr.push(dataToArr[i].split(','));
-}
+let data = fs.readFileSync(resolve('input.csv'), 'utf-8').split('\r\n');
+let splitedArr = data.map(user => user.split(','));
 
 let outPutArr = [
   [ 'Name /\ Date' ]
 ]
 
-for (let i = 1; i < arr.length; i += 1 ) {
-  if (outPutArr[0][outPutArr[0].length-1] !== arr[i][1]) outPutArr[0].push(arr[i][1]);
-  if (outPutArr.some(name => name[0] === arr[i][0]) === false) {
-    let tempArr = [arr[i][0]];
-    let idDate = outPutArr[0].indexOf(arr[i][1]);
-    if (idDate === 1) tempArr.splice(idDate, 0, arr[i][2]);
+for (let i = 1; i < splitedArr.length; i += 1 ) {
+  if (outPutArr[0][outPutArr[0].length-1] !== splitedArr[i][1]) outPutArr[0].push(splitedArr[i][1]); // date's row
+  let idDate = outPutArr[0].indexOf(splitedArr[i][1]); // position of current date in date's row  
+  if (!outPutArr.some(name => name[0] === splitedArr[i][0])) { // currentName !== AllPreviousNames
+    let tempArr = [splitedArr[i][0]];
+    if (idDate === 1) tempArr.splice(idDate, 0, splitedArr[i][2]); // add some hours at first cell
     if (idDate > 1) {
-      tempArr.fill('0', 1, idDate);
       for (let k = 1; k < idDate; k += 1) {
-        tempArr.push(0);
+        tempArr.push(0); // push 0 hours idDate times after first cell
       }
-      tempArr.push(arr[i][2]);
+      tempArr.push(splitedArr[i][2]); // push some hours after first cell
     }
     outPutArr.push(tempArr);
-  } else {
-    outPutArr.map(name => {
-      if (name[0] === arr[i][0]) {
-        let idDate = outPutArr[0].indexOf(arr[i][1])
-        let diff = (idDate-(name.length-1));
-        if (diff > 1) {
-          for (let k = 1; k < diff; k += 1) {
-            name.push(0);
-          }
-          name.push(arr[i][2]);
-        } else {
-          name.push(arr[i][2]);
-        }
-      } 
-    })  
   }
+  outPutArr.forEach(name => {
+    if (name[0] === splitedArr[i][0]) { // currentName === AllPreviousNames
+      let diff = (idDate-(name.length-1));
+      if (diff > 1) {
+        for (let k = 1; k < diff; k += 1) {
+          name.push(0); // push 0 hours diff times after first cells
+        }
+        name.push(splitedArr[i][2]); // push some hours after first cells
+      } else {
+        name.push(splitedArr[i][2]); // push some hours after first cells
+      }
+    } 
+  })  
 }
 
-for (let i = 0; i < arr.length; i += 1 ) {  
-  outPutArr.map(name => {
-    if (name[0] === arr[i][0]) {
+for (let i = 0; i < splitedArr.length; i += 1 ) {  
+  outPutArr.forEach(name => {
+    if (name[0] === splitedArr[i][0]) {
       let countOfZero = (outPutArr[0].length-1) - (name.length-1);
         for (let k = 1; k <= countOfZero; k += 1) {
-          name.push(0);
+          name.push(0); // push 0 hours countOfZero after all cell
         }
     } 
   })  
 }
 
-outPutArr[0].map((date, index) => {
-  let isoDate;
-  if  (index >= 1) {
-    isoDate = new Date(date + ' 10:00');
+outPutArr[0].map((date, index) => { // MM DD YYYY to YYYY MM DD
+  if (index >= 1) {
+    let isoDate = new Date(date + ' 10:00');
     outPutArr[0][index] = isoDate.toISOString().slice(0,10);
   }
 })
 
-let csvStr = ''
-for (let i = 0; i < outPutArr.length; i += 1 ) {
-  csvStr = csvStr.concat(outPutArr[i].toString(), '\n');
-}
+let csvStr = outPutArr.join('\r\n');
 
 fs.writeFile('output.csv', csvStr, error => {
   if (error) {
